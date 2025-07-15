@@ -1,1 +1,538 @@
-// os-ui.css placeholder
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: rgba(32, 32, 32, 0.5); /* aur zyada transparent */
+  backdrop-filter: blur(30px); /* blur effect ko aur strong kiya */
+  -webkit-backdrop-filter: blur(30px); /* Safari ke liye */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  z-index: 1000;
+  transition: background 0.3s, backdrop-filter 0.3s;
+}
+
+.taskbar-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.start-button {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.start-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.start-button:active {
+  transform: scale(0.95);
+}
+
+.start-button svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.taskbar-apps {
+  display: flex;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.taskbar-app {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 18px;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: fadeInScale 0.3s ease forwards;
+}
+
+.taskbar-app:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.taskbar-app.active {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes fadeInScale {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.clock {
+  position: absolute;
+  right: 12px;
+  color: white;
+  font-size: 13px;
+  text-align: right;
+  line-height: 1.2;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.clock:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.add-app-btn {
+  position: absolute;
+  left: 12px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 20px;
+}
+
+.add-app-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Start Menu */
+.start-menu {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  max-width: 90vw;
+  height: 680px;
+  max-height: 80vh;
+  background: rgba(32, 32, 32, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.start-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.start-menu-header {
+  padding: 24px 32px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.start-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.start-menu-content {
+  padding: 24px 32px;
+  height: calc(100% - 80px);
+  overflow-y: auto;
+}
+
+.pinned-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.app-item {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  text-decoration: none;
+}
+
+.app-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.app-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.app-name {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.recommended-section {
+  margin-top: 24px;
+}
+
+.recommended-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommended-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: white;
+}
+
+.recommended-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.recommended-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.recommended-content {
+  flex: 1;
+}
+
+.recommended-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.recommended-subtitle {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Notification Panel */
+.notification-panel {
+  position: fixed;
+  bottom: 60px;
+  right: 12px;
+  width: 400px;
+  max-width: 90vw;
+  background: rgba(32, 32, 32, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.notification-panel.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.notification-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.notification-settings {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.notification-settings:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.notification-content {
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.focus-timer {
+  background: rgba(32, 32, 32, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 24px;
+  margin-top: 12px;
+}
+
+.focus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.focus-date {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.focus-expand {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 16px;
+}
+
+.focus-expand:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.focus-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.focus-time-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.focus-time-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 18px;
+}
+
+.focus-time-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.focus-time-btn:active {
+  transform: scale(0.95);
+}
+
+.focus-time-display {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 80px;
+  text-align: center;
+}
+
+.focus-start-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.focus-start-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.focus-start-btn.active {
+  background: rgba(0, 120, 215, 0.8);
+}
+
+.focus-start-btn.active:hover {
+  background: rgba(0, 120, 215, 0.9);
+}
+
+/* Overlay for closing menu */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 998;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* Custom scrollbar */
+.start-menu-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.start-menu-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.start-menu-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.start-menu-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .start-menu {
+    width: 95vw;
+    height: 70vh;
+    bottom: 60px;
+  }
+
+  .app-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}

@@ -1,25 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>My WebOS</title>
-  <link rel="stylesheet" href="css/global.css" />
-  <link rel="stylesheet" href="css/os-ui.css" />
-</head>
-<body onload="bootOS()">
-  <div id="desktop">
-    <div class="icon" onclick="openApp('text-editor')">
-      <img src="assets/icons/text-editor.png" />
-      <p>Text Editor</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webOS Desktop</title>
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/os-ui.css" />
+  </head>
+  <body>
+    <div class="desktop">
+      <!-- Include UI elements -->
+      <div class="taskbar">
+        <!-- <button class="add-app-btn" id="addAppBtn">+</button> -->
+        <div class="taskbar-center">
+          <button class="start-button" id="startButton" title="Start">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"
+              />
+            </svg>
+          </button>
+          <div class="taskbar-apps" id="taskbarApps">
+            <!-- Dummy app icons (browser, files, settings, music) hata diye -->
+          </div>
+        </div>
+        <div class="clock" id="clock"></div>
+      </div>
+
+      <!-- Wallpaper change UI (button/input) hata diya -->
+
+      <div class="start-menu" id="startMenu">
+        <!-- Start Menu content -->
+        <div class="start-menu-header">
+          <div class="start-menu-user">
+            <div class="user-avatar">U</div>
+            <div class="user-name">User</div>
+          </div>
+        </div>
+        <div class="start-menu-content">
+          <!-- App list and recommended section will go here -->
+          <div class="app-grid" id="appGrid">
+            <div
+              class="app-item"
+              data-app-name="Wallpaper Changer"
+              data-app-icon="🖼️"
+              data-app-path="apps/wallpaper-changer/app.html"
+            >
+              <div
+                class="app-icon"
+                style="background: linear-gradient(135deg, #667eea, #764ba2)"
+              >
+                🖼️
+              </div>
+              <div class="app-name">Wallpaper Changer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Draggable App Window (dynamic) -->
+      <div id="dynamicAppWindow" class="app-window" style="display: none">
+        <div class="app-window-header" id="dynamicAppWindowHeader">
+          <span id="dynamicAppWindowTitle"></span>
+          <div class="app-window-controls">
+            <button
+              id="minimizeDynamicAppWindow"
+              title="Minimize"
+              class="window-btn"
+            >
+              _
+            </button>
+            <button
+              id="maximizeDynamicAppWindow"
+              title="Maximize"
+              class="window-btn"
+            >
+              □
+            </button>
+            <button id="closeDynamicAppWindow" title="Close" class="window-btn">
+              ✖️
+            </button>
+          </div>
+        </div>
+        <iframe
+          id="dynamicAppIframe"
+          src=""
+          frameborder="0"
+          style="width: 100%; height: calc(100% - 36px)"
+        ></iframe>
+      </div>
+
+      <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+          <div class="notification-title">Notifications</div>
+          <button class="notification-settings">⚙️</button>
+        </div>
+        <div class="notification-content">No new notifications</div>
+      </div>
+
+      <div class="overlay" id="overlay"></div>
     </div>
-    <div class="icon" onclick="openApp('calculator')">
-      <img src="assets/icons/calculator.png" />
-      <p>Calculator</p>
-    </div>
-  </div>
-  <div id="taskbar"><span>🟢 Start</span></div>
-  <script src="core/boot.js"></script>
-  <script src="core/window-manager.js"></script>
-  <script src="core/taskbar.js"></script>
-</body>
+
+    <script src="core/boot.js"></script>
+    <script src="core/taskbar.js"></script>
+    <script src="core/window-manager.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+      // Generic draggable app window logic
+      const appGrid = document.getElementById("appGrid");
+      const win = document.getElementById("dynamicAppWindow");
+      const closeBtn = document.getElementById("closeDynamicAppWindow");
+      const maximizeBtn = document.getElementById("maximizeDynamicAppWindow");
+      const minimizeBtn = document.getElementById("minimizeDynamicAppWindow");
+      const header = document.getElementById("dynamicAppWindowHeader");
+      const titleSpan = document.getElementById("dynamicAppWindowTitle");
+      const iframe = document.getElementById("dynamicAppIframe");
+      let isMaximized = false;
+      let prevSize = {};
+      appGrid.addEventListener("click", function (e) {
+        let appItem = e.target.closest(".app-item");
+        if (appItem) {
+          const appName = appItem.getAttribute("data-app-name") || "App";
+          const appIcon = appItem.getAttribute("data-app-icon") || "";
+          const appPath = appItem.getAttribute("data-app-path");
+          if (appPath) {
+            titleSpan.textContent = `${appIcon} ${appName}`;
+            iframe.src = appPath;
+            win.style.display = "block";
+            win.style.zIndex = 3000;
+            win.style.left = "calc(50% - 250px)";
+            win.style.top = "100px";
+            win.style.width = "500px";
+            win.style.height = "400px";
+            isMaximized = false;
+            maximizeBtn.textContent = "□";
+          }
+        }
+      });
+      closeBtn.addEventListener("click", () => {
+        win.style.display = "none";
+        iframe.src = "";
+      });
+      maximizeBtn.addEventListener("click", () => {
+        if (!isMaximized) {
+          // Save previous size/position
+          prevSize = {
+            left: win.style.left,
+            top: win.style.top,
+            width: win.style.width,
+            height: win.style.height,
+          };
+          win.style.left = "0";
+          win.style.top = "0";
+          win.style.width = "100vw";
+          win.style.height = "100vh";
+          isMaximized = true;
+          maximizeBtn.textContent = "❐"; // Restore icon
+        } else {
+          // Restore previous size/position
+          win.style.left = prevSize.left || "calc(50% - 250px)";
+          win.style.top = prevSize.top || "100px";
+          win.style.width = prevSize.width || "500px";
+          win.style.height = prevSize.height || "400px";
+          isMaximized = false;
+          maximizeBtn.textContent = "□";
+        }
+      });
+      minimizeBtn.addEventListener("click", () => {
+        win.style.display = "none";
+      });
+      // Drag logic
+      let isDragging = false,
+        offsetX = 0,
+        offsetY = 0;
+      header.addEventListener("mousedown", function (e) {
+        // Only drag if not clicking on controls
+        if (e.target.closest(".app-window-controls")) return;
+        isDragging = true;
+        offsetX = e.clientX - win.offsetLeft;
+        offsetY = e.clientY - win.offsetTop;
+        document.body.style.userSelect = "none";
+      });
+      document.addEventListener("mousemove", function (e) {
+        if (isDragging && !isMaximized) {
+          win.style.left = e.clientX - offsetX + "px";
+          win.style.top = e.clientY - offsetY + "px";
+        }
+      });
+      document.addEventListener("mouseup", function () {
+        isDragging = false;
+        document.body.style.userSelect = "";
+      });
+    </script>
+    <style>
+      .app-window {
+        position: fixed;
+        left: 50px;
+        top: 100px;
+        width: 500px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 10px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        border: 1px solid #aaa;
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: fadeIn 0.2s;
+      }
+      .app-window-header {
+        height: 36px;
+        background: linear-gradient(135deg, #232323, #333);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 8px 0 12px;
+        font-weight: 500;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #dynamicAppWindowTitle {
+        flex: 1;
+        cursor: move;
+        user-select: none;
+        -webkit-user-select: none;
+        text-align: left;
+        font-size: 15px;
+        padding-right: 8px;
+      }
+      .app-window-controls {
+        display: flex;
+        align-items: center;
+        gap: 0px 2px;
+      }
+      .window-btn {
+        width: 38px;
+        height: 36px;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 0;
+        transition: background 0.15s;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .window-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      .window-btn:last-child:hover {
+        background: #e81123;
+        color: #fff;
+      }
+      .app-window iframe {
+        border: none;
+        flex: 1;
+        width: 100%;
+        background: transparent;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+  </body>
 </html>

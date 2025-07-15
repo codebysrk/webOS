@@ -1,0 +1,157 @@
+.wallpaper-changer-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 36px 32px 28px 32px;
+  max-width: 350px;
+  margin: 60px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  border: 1.5px solid #e0e0e0;
+}
+
+.wallpaper-changer-card h2 {
+  margin-bottom: 8px;
+  color: #4b3f72;
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.preview-label {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 2px;
+  align-self: flex-start;
+}
+
+.wallpaper-preview {
+  width: 220px;
+  height: 120px;
+  background: #f3f3f3;
+  border: 1.5px solid #d1d1d1;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  overflow: hidden;
+  font-size: 14px;
+  color: #aaa;
+  transition: box-shadow 0.2s;
+}
+
+.wallpaper-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.file-label {
+  font-size: 15px;
+  color: #444;
+  margin-bottom: 4px;
+  align-self: flex-start;
+  cursor: pointer;
+}
+
+input[type="file"] {
+  margin-bottom: 8px;
+  align-self: flex-start;
+}
+
+.wallpaper-btn-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+#resetWallpaperBtn.secondary,
+#cancelBtn.secondary {
+  background: #f3f3f3;
+  color: #764ba2;
+  border: 1.5px solid #d1d1d1;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+#resetWallpaperBtn.secondary:hover,
+#cancelBtn.secondary:hover {
+  background: #e9e9e9;
+  color: #4b3f72;
+}
+
+#setWallpaperBtn,
+#confirmBtn {
+  padding: 10px 28px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(118, 75, 162, 0.08);
+}
+
+#setWallpaperBtn:hover,
+#confirmBtn:hover {
+  background: linear-gradient(90deg, #764ba2, #667eea);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.confirm-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.3s;
+}
+
+.toast.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 500px) {
+  .wallpaper-changer-card {
+    max-width: 98vw;
+    padding: 18px 4vw 18px 4vw;
+  }
+  .wallpaper-preview {
+    width: 98vw;
+    max-width: 98vw;
+    height: 28vw;
+    min-height: 80px;
+  }
+}

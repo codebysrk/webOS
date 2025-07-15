@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallpaper Changer</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <div class="wallpaper-changer-card">
+      <h2>Wallpaper Changer</h2>
+      <div class="preview-label">Preview:</div>
+      <div class="wallpaper-preview" id="wallpaperPreview">
+        No image selected
+      </div>
+      <label class="file-label" for="wallpaperInput">Choose an image</label>
+      <input type="file" id="wallpaperInput" accept="image/*" />
+      <div class="wallpaper-btn-row">
+        <button id="setWallpaperBtn">Set as Wallpaper</button>
+        <button id="resetWallpaperBtn" class="secondary">
+          Reset to Default
+        </button>
+      </div>
+      <div class="confirm-row" id="confirmRow" style="display: none">
+        <button id="confirmBtn">Confirm</button>
+        <button id="cancelBtn" class="secondary">Cancel</button>
+      </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
