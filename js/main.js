@@ -1,20 +1,13 @@
-// ✅ js/main.js
+// js/main.js
 window.onload = () => {
-  console.log("webOS initialized");
   updateClock();
-
-  // --- Multi-window app logic ---
   const appGrid = document.getElementById("appGrid");
   let zIndexCounter = 3000;
   const taskbarApps = document.getElementById("taskbarApps");
-  // Track open windows per appPath
-  // const openAppWindows = {}; // This line is removed
-
-  // --- Centralized State Management ---
   const webOSState = {
-    openAppWindows: {}, // { appPath: [windowDiv, ...] }
-    notifications: [], // { text, timestamp }
-    settings: {}, // user settings, theme, etc.
+    openAppWindows: {},
+    notifications: [],
+    settings: {},
   };
 
   function setActiveTaskbarIcon(appPath) {
@@ -27,7 +20,6 @@ window.onload = () => {
   function updateTaskbarBadge(appPath) {
     const btn = taskbarApps.querySelector(`[data-app-path="${appPath}"]`);
     if (!btn) return;
-    // Remove old badge if exists
     let badge = btn.querySelector(".taskbar-badge");
     if (badge) badge.remove();
     const count = webOSState.openAppWindows[appPath]
@@ -42,7 +34,6 @@ window.onload = () => {
     btn.title = count > 1 ? `${count} windows open` : btn.title.split(" (")[0];
   }
 
-  // Context menu for taskbar icons
   let contextMenu = null;
   function showTaskbarContextMenu(appPath, x, y) {
     hideTaskbarContextMenu();
@@ -58,7 +49,6 @@ window.onload = () => {
       <div class="context-menu-item" data-action="close">Close all windows</div>
     `;
     document.body.appendChild(contextMenu);
-    // --- Fix: reposition if overflowing viewport ---
     const menuRect = contextMenu.getBoundingClientRect();
     let newLeft = x,
       newTop = y;
@@ -70,7 +60,6 @@ window.onload = () => {
       newTop = Math.max(0, window.innerHeight - menuRect.height - 4);
       contextMenu.style.top = newTop + "px";
     }
-    // --- End fix ---
     contextMenu.addEventListener("click", (e) => {
       const item = e.target.closest(".context-menu-item");
       if (!item) return;
@@ -109,7 +98,6 @@ window.onload = () => {
   }
 
   function ensureTaskbarIcon({ appName, appIcon, appPath }) {
-    // Check if icon already exists
     let btn = taskbarApps.querySelector(`[data-app-path="${appPath}"]`);
     if (!btn) {
       btn = document.createElement("button");
@@ -118,7 +106,6 @@ window.onload = () => {
       btn.title = appName;
       btn.innerHTML = appIcon;
       btn.addEventListener("click", () => {
-        // Bring all windows of this app to front
         if (webOSState.openAppWindows[appPath]) {
           webOSState.openAppWindows[appPath].forEach((win) => {
             win.style.display = "flex";
@@ -143,10 +130,8 @@ window.onload = () => {
   }
 
   function createAppWindow({ appName, appIcon, appPath }) {
-    // Create window elements
     const win = document.createElement("div");
     win.className = "app-window";
-    // Mobile full-screen logic
     const isMobile = window.innerWidth <= 600;
     if (isMobile) {
       win.classList.add("fullscreen");
@@ -162,7 +147,6 @@ window.onload = () => {
     win.style.position = "fixed";
     win.style.animation = "fadeIn 0.2s";
 
-    // Header
     const header = document.createElement("div");
     header.className = "app-window-header";
     header.style.cursor = "move";
@@ -173,20 +157,16 @@ window.onload = () => {
     titleSpan.style.fontSize = "15px";
     titleSpan.style.paddingRight = "8px";
     titleSpan.style.userSelect = "none";
-    // Controls
     const controls = document.createElement("div");
     controls.className = "app-window-controls";
-    // Minimize
     const minBtn = document.createElement("button");
     minBtn.className = "window-btn";
     minBtn.title = "Minimize";
     minBtn.textContent = "_";
-    // Maximize
     const maxBtn = document.createElement("button");
     maxBtn.className = "window-btn";
     maxBtn.title = "Maximize";
     maxBtn.textContent = "□";
-    // Close
     const closeBtn = document.createElement("button");
     closeBtn.className = "window-btn";
     closeBtn.title = "Close";
@@ -194,20 +174,17 @@ window.onload = () => {
     controls.append(minBtn, maxBtn, closeBtn);
     header.append(titleSpan, controls);
     win.appendChild(header);
-    // Iframe
     const iframe = document.createElement("iframe");
     iframe.src = appPath;
     iframe.style.width = "100%";
     iframe.style.flex = "1";
     iframe.style.border = "none";
     iframe.style.background = "transparent";
-    // --- SANDBOXING ---
     iframe.setAttribute(
       "sandbox",
       "allow-scripts allow-forms allow-same-origin"
     );
     win.appendChild(iframe);
-    // Add to DOM
     document.body.appendChild(win);
     if (!webOSState.openAppWindows[appPath])
       webOSState.openAppWindows[appPath] = [];
@@ -216,14 +193,12 @@ window.onload = () => {
     setActiveTaskbarIcon(appPath);
     updateTaskbarBadge(appPath);
 
-    // Z-index focus
     win.addEventListener("mousedown", () => {
       zIndexCounter++;
       win.style.zIndex = zIndexCounter;
       setActiveTaskbarIcon(appPath);
     });
 
-    // Drag logic
     let isDragging = false,
       offsetX = 0,
       offsetY = 0,
@@ -249,10 +224,8 @@ window.onload = () => {
       document.body.style.userSelect = "";
     });
 
-    // Controls
     closeBtn.addEventListener("click", () => {
       win.remove();
-      // Remove from openAppWindows
       if (webOSState.openAppWindows[appPath]) {
         webOSState.openAppWindows[appPath] = webOSState.openAppWindows[
           appPath
@@ -267,7 +240,6 @@ window.onload = () => {
     });
     minBtn.addEventListener("click", () => {
       win.style.display = "none";
-      // Optionally: add to taskbar for restore
     });
     maxBtn.addEventListener("click", () => {
       if (!isMaximized) {
@@ -292,16 +264,13 @@ window.onload = () => {
         maxBtn.textContent = "□";
       }
     });
-    // Restore on click if minimized
     win.addEventListener("dblclick", () => {
       win.style.display = "flex";
       zIndexCounter++;
       win.style.zIndex = zIndexCounter;
     });
 
-    // --- POSTMESSAGE COMMUNICATION ---
     iframe.addEventListener("load", () => {
-      // Send a handshake to the app
       iframe.contentWindow.postMessage(
         { type: "webos-handshake", appName },
         "*"
@@ -310,30 +279,23 @@ window.onload = () => {
     return win;
   }
 
-  // --- OS API/SDK for Apps ---
-  // Listen for handshake from app and respond with available API
   window.addEventListener("message", (event) => {
     const msg = event.data;
     if (!msg || typeof msg !== "object" || !msg.type) return;
-    // Handshake from app
     if (msg.type === "webos-handshake-app") {
-      // Send API description
       event.source.postMessage(
         {
           type: "webos-api",
           api: {
             notify: true,
-            // Add more capabilities here
           },
         },
         event.origin || "*"
       );
     }
     if (msg.type === "webos-notify") {
-      // Example: Show a notification from app
       alert(`App Notification: ${msg.text}`);
     }
-    // Add more message types as needed
   });
 
   appGrid.addEventListener("click", function (e) {
@@ -351,27 +313,20 @@ window.onload = () => {
   });
 };
 
-// Add dynamic app loading logic at the top
-
 async function getAppFolders() {
-  // Try to fetch directory listing (requires server support)
   try {
     const res = await fetch("apps/");
     if (res.ok) {
       const text = await res.text();
-      // Try to parse directory listing (works if server returns HTML index)
       const matches = [...text.matchAll(/href="([a-zA-Z0-9-_]+)\/?"/g)];
       const folders = matches
         .map((m) => m[1])
         .filter((name) => name && !name.includes("."));
-      // Remove duplicates
       return [...new Set(folders)];
     }
   } catch (e) {
-    // Fallback to static list
     return ["calculator", "text-editor", "wallpaper-changer"];
   }
-  // Fallback to static list
   return ["calculator", "text-editor", "wallpaper-changer"];
 }
 
@@ -396,20 +351,11 @@ async function loadAppManifests() {
   return manifests;
 }
 
-// On DOMContentLoaded, use manifests to populate UI
 window.addEventListener("DOMContentLoaded", async () => {
   const apps = await loadAppManifests();
-  // TODO: Use 'apps' to populate taskbar, start menu, etc.
-  // Example: ensureTaskbarIcon({ appName, appIcon, appPath })
+  // Use 'apps' to populate taskbar, start menu, etc. (future enhancement)
 });
 
-// ---
-// Communication Protocol:
-// - OS → App: { type: "webos-handshake", appName }
-// - App → OS: { type: "webos-notify", text: "..." }
-// ---
-
-// --- User Profiles, Theme Selection, Persistent Settings ---
 function loadSettings() {
   try {
     const saved = localStorage.getItem("webos-settings");
@@ -424,21 +370,17 @@ function saveSettings() {
   } catch {}
 }
 
-// Example: Theme switcher
 function applyTheme(theme) {
   document.body.setAttribute("data-theme", theme);
   webOSState.settings.theme = theme;
   saveSettings();
 }
 
-// Example: User profile
 function setUserProfile({ name, avatar }) {
   webOSState.settings.user = { name, avatar };
   saveSettings();
-  // Optionally update UI
 }
 
-// --- Persistent Wallpaper ---
 function setWallpaper(url) {
   const desktop = document.querySelector(".desktop");
   if (desktop) {
@@ -451,7 +393,6 @@ function setWallpaper(url) {
   }
 }
 
-// Listen for wallpaper change messages from apps
 window.addEventListener("message", (event) => {
   const msg = event.data;
   if (!msg || typeof msg !== "object" || !msg.type) return;
@@ -460,7 +401,6 @@ window.addEventListener("message", (event) => {
   }
 });
 
-// On load, initialize settings and wallpaper
 window.addEventListener("DOMContentLoaded", () => {
   loadSettings();
   if (webOSState.settings.theme) {
@@ -469,25 +409,14 @@ window.addEventListener("DOMContentLoaded", () => {
   if (webOSState.settings.wallpaper) {
     setWallpaper(webOSState.settings.wallpaper);
   }
-  // Optionally, update user profile UI
 });
 
-// --- Performance Optimization ---
-// App iframes are already lazy-loaded (created only when opened)
-// For further optimization, consider code-splitting:
-// - Use dynamic import() for app manifests or window logic if modularized
-// - Use a build tool (Webpack/Vite) for automatic code-splitting in production
-
-// --- Simple Package Management (Install/Uninstall Apps) ---
-// These are placeholders; actual implementation requires backend or file system access
 function installApp(appZipUrl) {
-  // Download and extract app zip to apps/ (requires backend or user action)
   alert(
     "App installation is not supported in the browser-only version. Please copy the app folder to apps/."
   );
 }
 function uninstallApp(appName) {
-  // Remove app folder from apps/ (requires backend or user action)
   alert(
     "App uninstall is not supported in the browser-only version. Please delete the app folder from apps/."
   );

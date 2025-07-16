@@ -9,9 +9,7 @@
   </head>
   <body>
     <main id="desktop" class="desktop" role="main" aria-label="Desktop Area">
-      <!-- Include UI elements -->
       <div class="taskbar">
-        <!-- <button class="add-app-btn" id="addAppBtn">+</button> -->
         <div class="taskbar-center">
           <button class="start-button" id="startButton" title="Start">
             <svg viewBox="0 0 24 24">
@@ -20,17 +18,11 @@
               />
             </svg>
           </button>
-          <div class="taskbar-apps" id="taskbarApps">
-            <!-- Dummy app icons (browser, files, settings, music) hata diye -->
-          </div>
+          <div class="taskbar-apps" id="taskbarApps"></div>
         </div>
         <div class="clock" id="clock"></div>
       </div>
-
-      <!-- Wallpaper change UI (button/input) hata diya -->
-
       <div class="start-menu" id="startMenu">
-        <!-- Start Menu content -->
         <div class="start-menu-header">
           <div class="start-menu-user">
             <div class="user-avatar">U</div>
@@ -38,7 +30,6 @@
           </div>
         </div>
         <div class="start-menu-content">
-          <!-- App list and recommended section will go here -->
           <div class="app-grid" id="appGrid">
             <div
               class="app-item"
@@ -54,41 +45,9 @@
               </div>
               <div class="app-name">Wallpaper Changer</div>
             </div>
-            <div
-              class="app-item"
-              data-app-name="Calculator"
-              data-app-icon="🧮"
-              data-app-path="apps/calculator/index.html"
-            >
-              <div
-                class="app-icon"
-                style="background: linear-gradient(135deg, #f7971e, #ffd200)"
-              >
-                🧮
-              </div>
-              <div class="app-name">Calculator</div>
-            </div>
-            <div
-              class="app-item"
-              data-app-name="Text Editor"
-              data-app-icon="📝"
-              data-app-path="apps/text-editor/index.html"
-            >
-              <div
-                class="app-icon"
-                style="background: linear-gradient(135deg, #43cea2, #185a9d)"
-              >
-                📝
-              </div>
-              <div class="app-name">Text Editor</div>
-            </div>
           </div>
         </div>
       </div>
-
-      <!-- Draggable App Window (dynamic) -->
-      <!-- Removed static #dynamicAppWindow. Windows will be created dynamically by JS. -->
-
       <div class="notification-panel" id="notificationPanel">
         <div class="notification-header">
           <div class="notification-title">Notifications</div>
@@ -96,15 +55,12 @@
         </div>
         <div class="notification-content">No new notifications</div>
       </div>
-
       <div class="overlay" id="overlay"></div>
     </main>
-
     <script src="core/boot.js"></script>
     <script src="core/taskbar.js"></script>
     <script src="core/window-manager.js"></script>
     <script src="js/main.js"></script>
-    <!-- Removed inline script for app window logic. All window logic will be in js/main.js. -->
     <style>
       .app-window {
         position: fixed;

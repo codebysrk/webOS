@@ -21,6 +21,10 @@ window.openStartMenu = openStartMenu;
 function closeStartMenu() {
   startMenu.classList.remove("open");
   overlay.classList.remove("active");
+  // Also close notification panel if open
+  if (notificationPanel.classList.contains("open")) {
+    closeNotificationPanel();
+  }
 }
 window.closeStartMenu = closeStartMenu;
 

@@ -6,7 +6,6 @@ function setActiveApp(appElement) {
 }
 
 function addNewApp(appList, taskbarApps) {
-  // Filter out calculator and text-editor from the available apps
   const filteredAppList = appList.filter(
     (app) => app.id !== "calculator" && app.id !== "text-editor"
   );
