@@ -15,6 +15,7 @@ function openStartMenu() {
   window.closeNotificationPanel && window.closeNotificationPanel();
   startMenu.classList.add("open");
   overlay.classList.add("active");
+  startMenu.style.zIndex = 99999;
 }
 window.openStartMenu = openStartMenu;
 
@@ -25,6 +26,7 @@ function closeStartMenu() {
   if (notificationPanel.classList.contains("open")) {
     closeNotificationPanel();
   }
+  startMenu.style.zIndex = 2000;
 }
 window.closeStartMenu = closeStartMenu;
 
@@ -38,11 +40,13 @@ function openNotificationPanel() {
   // Do NOT close start menu here
   notificationPanel.classList.add("open");
   overlay.classList.add("active");
+  notificationPanel.style.zIndex = 100000;
 }
 
 function closeNotificationPanel() {
   notificationPanel.classList.remove("open");
   overlay.classList.remove("active");
+  notificationPanel.style.zIndex = 2000;
 }
 window.closeNotificationPanel = closeNotificationPanel;
 
