@@ -3,30 +3,102 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wallpaper Changer</title>
+    <title>Wallpaper Studio Pro</title>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <div class="wallpaper-changer-card">
-      <h2>Wallpaper Changer</h2>
-      <div class="preview-label">Preview:</div>
-      <div class="wallpaper-preview" id="wallpaperPreview">
-        No image selected
-      </div>
-      <label class="file-label" for="wallpaperInput">Choose an image</label>
-      <input type="file" id="wallpaperInput" accept="image/*" />
-      <div class="wallpaper-btn-row">
-        <button id="setWallpaperBtn">Set as Wallpaper</button>
-        <button id="resetWallpaperBtn" class="secondary">
-          Reset to Default
-        </button>
-      </div>
-      <div class="confirm-row" id="confirmRow" style="display: none">
-        <button id="confirmBtn">Confirm</button>
-        <button id="cancelBtn" class="secondary">Cancel</button>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon">🎨</div>
+        </div>
+        <h1 class="main-title">Wallpaper Studio</h1>
+        <p class="subtitle">
+          Transform your desktop experience with stunning wallpapers
+        </p>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Preview Section -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon">👁️</div>
+            <h2 class="section-title">Preview</h2>
+          </div>
+
+          <div class="preview-container">
+            <div class="wallpaper-preview" id="wallpaperPreview">
+              <div class="preview-placeholder">
+                <div class="preview-placeholder-icon">🖼️</div>
+                <div>No wallpaper selected</div>
+              </div>
+            </div>
+
+            <div class="preview-controls">
+              <div class="preview-info" id="previewInfo">
+                Select an image to preview
+              </div>
+              <div class="preview-actions">
+                <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">
+                  🔍
+                </button>
+                <button class="icon-btn" id="downloadBtn" title="Download">
+                  💾
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon">📤</div>
+            <h2 class="section-title">Upload</h2>
+          </div>
+
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-content">
+              <div class="upload-icon">📁</div>
+              <div class="upload-text">Drop your wallpaper here</div>
+              <div class="upload-subtext">or click to browse files</div>
+            </div>
+            <input
+              type="file"
+              id="fileInput"
+              class="file-input"
+              accept="image/*"
+            />
+          </div>
+
+          <div class="action-buttons">
+            <button id="applyBtn" class="btn btn-primary" disabled>
+              Apply Wallpaper
+            </button>
+            <button id="resetBtn" class="btn btn-secondary">
+              Reset Default
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+      <div class="modal-content">
+        <div class="modal-text">Apply this wallpaper to your desktop?</div>
+        <div class="modal-buttons">
+          <button id="confirmBtn" class="btn btn-primary">Apply</button>
+          <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+        </div>
       </div>
     </div>
+
+    <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
+
     <script src="index.js"></script>
   </body>
 </html>
