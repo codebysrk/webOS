@@ -12,14 +12,17 @@ startButton?.addEventListener("click", () => {
 });
 
 function openStartMenu() {
+  window.closeNotificationPanel && window.closeNotificationPanel();
   startMenu.classList.add("open");
   overlay.classList.add("active");
 }
+window.openStartMenu = openStartMenu;
 
 function closeStartMenu() {
   startMenu.classList.remove("open");
   overlay.classList.remove("active");
 }
+window.closeStartMenu = closeStartMenu;
 
 clockElement?.addEventListener("click", () => {
   const isOpen = notificationPanel.classList.contains("open");
@@ -28,7 +31,7 @@ clockElement?.addEventListener("click", () => {
 });
 
 function openNotificationPanel() {
-  closeStartMenu();
+  // Do NOT close start menu here
   notificationPanel.classList.add("open");
   overlay.classList.add("active");
 }
@@ -37,6 +40,7 @@ function closeNotificationPanel() {
   notificationPanel.classList.remove("open");
   overlay.classList.remove("active");
 }
+window.closeNotificationPanel = closeNotificationPanel;
 
 overlay?.addEventListener("click", () => {
   closeNotificationPanel();

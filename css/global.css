@@ -4,15 +4,22 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 100%; /* Respect user font scaling */
+}
+:focus {
+  outline: 2px solid #764ba2;
+  outline-offset: 2px;
+}
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: url("../assets/wallpapers/bg.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 100vh;
-  overflow: hidden;
-  position: relative;
+  background: #f0f0f0;
+  color: #222;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #181828;
+    color: #f0f0f0;
+  }
 }
 
 .desktop {

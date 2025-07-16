@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/os-ui.css" />
   </head>
   <body>
-    <div class="desktop">
+    <main id="desktop" class="desktop" role="main" aria-label="Desktop Area">
       <!-- Include UI elements -->
       <div class="taskbar">
         <!-- <button class="add-app-btn" id="addAppBtn">+</button> -->
@@ -44,7 +44,7 @@
               class="app-item"
               data-app-name="Wallpaper Changer"
               data-app-icon="🖼️"
-              data-app-path="apps/wallpaper-changer/app.html"
+              data-app-path="apps/wallpaper-changer/index.html"
             >
               <div
                 class="app-icon"
@@ -54,41 +54,40 @@
               </div>
               <div class="app-name">Wallpaper Changer</div>
             </div>
+            <div
+              class="app-item"
+              data-app-name="Calculator"
+              data-app-icon="🧮"
+              data-app-path="apps/calculator/index.html"
+            >
+              <div
+                class="app-icon"
+                style="background: linear-gradient(135deg, #f7971e, #ffd200)"
+              >
+                🧮
+              </div>
+              <div class="app-name">Calculator</div>
+            </div>
+            <div
+              class="app-item"
+              data-app-name="Text Editor"
+              data-app-icon="📝"
+              data-app-path="apps/text-editor/index.html"
+            >
+              <div
+                class="app-icon"
+                style="background: linear-gradient(135deg, #43cea2, #185a9d)"
+              >
+                📝
+              </div>
+              <div class="app-name">Text Editor</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Draggable App Window (dynamic) -->
-      <div id="dynamicAppWindow" class="app-window" style="display: none">
-        <div class="app-window-header" id="dynamicAppWindowHeader">
-          <span id="dynamicAppWindowTitle"></span>
-          <div class="app-window-controls">
-            <button
-              id="minimizeDynamicAppWindow"
-              title="Minimize"
-              class="window-btn"
-            >
-              _
-            </button>
-            <button
-              id="maximizeDynamicAppWindow"
-              title="Maximize"
-              class="window-btn"
-            >
-              □
-            </button>
-            <button id="closeDynamicAppWindow" title="Close" class="window-btn">
-              ✖️
-            </button>
-          </div>
-        </div>
-        <iframe
-          id="dynamicAppIframe"
-          src=""
-          frameborder="0"
-          style="width: 100%; height: calc(100% - 36px)"
-        ></iframe>
-      </div>
+      <!-- Removed static #dynamicAppWindow. Windows will be created dynamically by JS. -->
 
       <div class="notification-panel" id="notificationPanel">
         <div class="notification-header">
@@ -99,99 +98,13 @@
       </div>
 
       <div class="overlay" id="overlay"></div>
-    </div>
+    </main>
 
     <script src="core/boot.js"></script>
     <script src="core/taskbar.js"></script>
     <script src="core/window-manager.js"></script>
     <script src="js/main.js"></script>
-    <script>
-      // Generic draggable app window logic
-      const appGrid = document.getElementById("appGrid");
-      const win = document.getElementById("dynamicAppWindow");
-      const closeBtn = document.getElementById("closeDynamicAppWindow");
-      const maximizeBtn = document.getElementById("maximizeDynamicAppWindow");
-      const minimizeBtn = document.getElementById("minimizeDynamicAppWindow");
-      const header = document.getElementById("dynamicAppWindowHeader");
-      const titleSpan = document.getElementById("dynamicAppWindowTitle");
-      const iframe = document.getElementById("dynamicAppIframe");
-      let isMaximized = false;
-      let prevSize = {};
-      appGrid.addEventListener("click", function (e) {
-        let appItem = e.target.closest(".app-item");
-        if (appItem) {
-          const appName = appItem.getAttribute("data-app-name") || "App";
-          const appIcon = appItem.getAttribute("data-app-icon") || "";
-          const appPath = appItem.getAttribute("data-app-path");
-          if (appPath) {
-            titleSpan.textContent = `${appIcon} ${appName}`;
-            iframe.src = appPath;
-            win.style.display = "block";
-            win.style.zIndex = 3000;
-            win.style.left = "calc(50% - 250px)";
-            win.style.top = "100px";
-            win.style.width = "500px";
-            win.style.height = "400px";
-            isMaximized = false;
-            maximizeBtn.textContent = "□";
-          }
-        }
-      });
-      closeBtn.addEventListener("click", () => {
-        win.style.display = "none";
-        iframe.src = "";
-      });
-      maximizeBtn.addEventListener("click", () => {
-        if (!isMaximized) {
-          // Save previous size/position
-          prevSize = {
-            left: win.style.left,
-            top: win.style.top,
-            width: win.style.width,
-            height: win.style.height,
-          };
-          win.style.left = "0";
-          win.style.top = "0";
-          win.style.width = "100vw";
-          win.style.height = "100vh";
-          isMaximized = true;
-          maximizeBtn.textContent = "❐"; // Restore icon
-        } else {
-          // Restore previous size/position
-          win.style.left = prevSize.left || "calc(50% - 250px)";
-          win.style.top = prevSize.top || "100px";
-          win.style.width = prevSize.width || "500px";
-          win.style.height = prevSize.height || "400px";
-          isMaximized = false;
-          maximizeBtn.textContent = "□";
-        }
-      });
-      minimizeBtn.addEventListener("click", () => {
-        win.style.display = "none";
-      });
-      // Drag logic
-      let isDragging = false,
-        offsetX = 0,
-        offsetY = 0;
-      header.addEventListener("mousedown", function (e) {
-        // Only drag if not clicking on controls
-        if (e.target.closest(".app-window-controls")) return;
-        isDragging = true;
-        offsetX = e.clientX - win.offsetLeft;
-        offsetY = e.clientY - win.offsetTop;
-        document.body.style.userSelect = "none";
-      });
-      document.addEventListener("mousemove", function (e) {
-        if (isDragging && !isMaximized) {
-          win.style.left = e.clientX - offsetX + "px";
-          win.style.top = e.clientY - offsetY + "px";
-        }
-      });
-      document.addEventListener("mouseup", function () {
-        isDragging = false;
-        document.body.style.userSelect = "";
-      });
-    </script>
+    <!-- Removed inline script for app window logic. All window logic will be in js/main.js. -->
     <style>
       .app-window {
         position: fixed;
@@ -203,11 +116,14 @@
         border-radius: 10px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
         border: 1px solid #aaa;
-        z-index: 3000;
+        z-index: 2000;
         display: flex;
         flex-direction: column;
         overflow: hidden;
         animation: fadeIn 0.2s;
+      }
+      .taskbar {
+        z-index: 10000 !important;
       }
       .app-window-header {
         height: 36px;
