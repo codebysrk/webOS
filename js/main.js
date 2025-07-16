@@ -6,13 +6,11 @@ const webOSState = {
 };
 
 window.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOMContentLoaded fired");
   updateClock();
   const appGrid = document.getElementById("appGrid");
   let zIndexCounter = 3000;
   const taskbarApps = document.getElementById("taskbarApps");
   const desktopIconsContainer = document.getElementById("desktopIcons");
-  console.log("desktopIconsContainer:", desktopIconsContainer);
 
   // --- Desktop Icons State ---
   let desktopIconPositions = {};
@@ -47,7 +45,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   // --- Render Desktop Icons (Apps + Files/Folders) ---
   function renderDesktopIcons(apps) {
-    console.log("renderDesktopIcons called", apps, desktopItems);
     desktopIconsContainer.innerHTML = "";
     const gapX = 16,
       gapY = 16,
@@ -243,7 +240,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
       });
       desktopIconsContainer.appendChild(iconDiv);
-      console.log("Added desktop icon", item);
     });
     saveDesktopIconPositions();
     saveDesktopItems();
@@ -371,21 +367,274 @@ window.addEventListener("DOMContentLoaded", async () => {
   function createAppWindow({ appName, appIcon, appPath }) {
     const win = document.createElement("div");
     win.className = "app-window";
-    // Remove forced fullscreen on mobile
-    // const isMobile = window.innerWidth <= 600;
-    // if (isMobile) {
-    //   win.classList.add("fullscreen");
-    // } else {
-    win.style.left = `${60 + Math.random() * 100}px`;
-    win.style.top = `${80 + Math.random() * 80}px`;
-    win.style.width = "500px";
-    win.style.height = "400px";
-    // }
+    // --- Restore last position/size if available ---
+    let savedState = null;
+    try {
+      savedState = JSON.parse(localStorage.getItem("webos-window-" + appPath));
+    } catch {}
+    if (savedState && typeof savedState === "object") {
+      // Parse values
+      let left = parseInt(savedState.left);
+      let top = parseInt(savedState.top);
+      let width = parseInt(savedState.width);
+      let height = parseInt(savedState.height);
+      // Agar value valid nahi hai toh default lagao
+      if (
+        isNaN(left) ||
+        isNaN(top) ||
+        isNaN(width) ||
+        isNaN(height) ||
+        left < 0 ||
+        top < 0 ||
+        width < 100 ||
+        height < 100 ||
+        left > window.innerWidth - 50 ||
+        top > window.innerHeight - 50
+      ) {
+        win.style.left = `${60 + Math.random() * 100}px`;
+        win.style.top = `${80 + Math.random() * 80}px`;
+        win.style.width = "500px";
+        win.style.height = "400px";
+      } else {
+        win.style.left = left + "px";
+        win.style.top = top + "px";
+        win.style.width = width + "px";
+        win.style.height = height + "px";
+      }
+    } else {
+      win.style.left = `${60 + Math.random() * 100}px`;
+      win.style.top = `${80 + Math.random() * 80}px`;
+      win.style.width = "500px";
+      win.style.height = "400px";
+    }
     win.style.zIndex = ++zIndexCounter;
     win.style.display = "flex";
     win.style.flexDirection = "column";
     win.style.position = "fixed";
     win.style.animation = "fadeIn 0.2s";
+
+    // --- Add 8 resize handles ---
+    const directions = [
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "top-left",
+      "top-right",
+      "bottom-left",
+      "bottom-right",
+    ];
+    directions.forEach((dir) => {
+      const handle = document.createElement("div");
+      handle.className = "resize-handle";
+      handle.setAttribute("data-direction", dir);
+      win.appendChild(handle);
+    });
+
+    // --- Resize logic (mouse + touch) ---
+    const minWidth = 300,
+      minHeight = 200,
+      snapDist = 20;
+    let resizing = false,
+      resizeDir = null,
+      startX = 0,
+      startY = 0,
+      startW = 0,
+      startH = 0,
+      startL = 0,
+      startT = 0;
+    // Yeh functions closure me hi rakho
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
+    function snap(val, edge) {
+      return Math.abs(val - edge) < snapDist ? edge : val;
+    }
+    function saveWindowState() {
+      localStorage.setItem(
+        "webos-window-" + appPath,
+        JSON.stringify({
+          left: win.style.left,
+          top: win.style.top,
+          width: win.style.width,
+          height: win.style.height,
+        })
+      );
+    }
+    // Pakka fix: listeners ka reference
+    function mouseMoveResizeHandler(e) {
+      if (!resizing) return;
+      onResizeMove(e);
+    }
+    function mouseUpResizeHandler(e) {
+      if (!resizing) return;
+      resizing = false;
+      document.removeEventListener("mousemove", mouseMoveResizeHandler);
+      document.removeEventListener("mouseup", mouseUpResizeHandler);
+      document.body.style.userSelect = "";
+      saveWindowState();
+    }
+    // Touch resize ke liye bhi reference handlers
+    function touchMoveResizeHandler(e) {
+      if (!resizing) return;
+      onResizeMove(e);
+    }
+    function touchEndResizeHandler(e) {
+      if (!resizing) return;
+      resizing = false;
+      document.removeEventListener("touchmove", touchMoveResizeHandler, {
+        passive: false,
+      });
+      document.removeEventListener("touchend", touchEndResizeHandler);
+      document.body.style.userSelect = "";
+      saveWindowState();
+    }
+    function onResizeMove(e) {
+      if (!resizing || win.classList.contains("fullscreen")) return;
+      let clientX, clientY;
+      if (e.touches) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      let dx = clientX - startX;
+      let dy = clientY - startY;
+      let newW = startW,
+        newH = startH,
+        newL = startL,
+        newT = startT;
+      if (resizeDir.includes("right"))
+        newW = clamp(startW + dx, minWidth, window.innerWidth - startL);
+      if (resizeDir.includes("left")) {
+        newW = clamp(startW - dx, minWidth, startL + startW);
+        newL = clamp(startL + dx, 0, startL + startW - minWidth);
+      }
+      if (resizeDir.includes("bottom"))
+        newH = clamp(startH + dy, minHeight, window.innerHeight - startT);
+      if (resizeDir.includes("top")) {
+        newH = clamp(startH - dy, minHeight, startT + startH);
+        newT = clamp(startT + dy, 0, startT + startH - minHeight);
+      }
+      // Snap to edges
+      if (resizeDir.includes("left")) newL = snap(newL, 0);
+      if (resizeDir.includes("top")) newT = snap(newT, 0);
+      if (resizeDir.includes("right"))
+        newW = snap(newL + newW, window.innerWidth) - newL;
+      if (resizeDir.includes("bottom"))
+        newH = snap(newT + newH, window.innerHeight) - newT;
+      // Prevent overflow
+      newW = Math.min(newW, window.innerWidth - newL);
+      newH = Math.min(newH, window.innerHeight - newT);
+      win.style.width = newW + "px";
+      win.style.height = newH + "px";
+      win.style.left = newL + "px";
+      win.style.top = newT + "px";
+      e.preventDefault && e.preventDefault();
+    }
+    win.querySelectorAll(".resize-handle").forEach((handle) => {
+      handle.addEventListener("mousedown", function (e) {
+        if (win.classList.contains("fullscreen")) return;
+        resizing = true;
+        resizeDir = handle.getAttribute("data-direction");
+        startX = e.clientX;
+        startY = e.clientY;
+        startW = win.offsetWidth;
+        startH = win.offsetHeight;
+        startL = win.offsetLeft;
+        startT = win.offsetTop;
+        document.body.style.userSelect = "none";
+        // Pakka: pehle remove karo, fir add karo (memory leak na ho)
+        document.removeEventListener("mousemove", mouseMoveResizeHandler);
+        document.removeEventListener("mouseup", mouseUpResizeHandler);
+        document.addEventListener("mousemove", mouseMoveResizeHandler);
+        document.addEventListener("mouseup", mouseUpResizeHandler);
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      handle.addEventListener(
+        "touchstart",
+        function (e) {
+          if (win.classList.contains("fullscreen")) return;
+          resizing = true;
+          resizeDir = handle.getAttribute("data-direction");
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          startW = win.offsetWidth;
+          startH = win.offsetHeight;
+          startL = win.offsetLeft;
+          startT = win.offsetTop;
+          document.body.style.userSelect = "none";
+          // Pehle remove karo, fir add karo
+          document.removeEventListener("touchmove", touchMoveResizeHandler, {
+            passive: false,
+          });
+          document.removeEventListener("touchend", touchEndResizeHandler);
+          document.addEventListener("touchmove", touchMoveResizeHandler, {
+            passive: false,
+          });
+          document.addEventListener("touchend", touchEndResizeHandler);
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        { passive: false }
+      );
+    });
+
+    // --- Pinch-to-resize (mobile/tablet) ---
+    let pinchResizing = false,
+      pinchStartDist = 0,
+      pinchStartW = 0,
+      pinchStartH = 0;
+    win.addEventListener("touchstart", function (e) {
+      if (win.classList.contains("fullscreen")) return;
+      if (e.touches.length === 2) {
+        pinchResizing = true;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchStartDist = Math.sqrt(dx * dx + dy * dy);
+        pinchStartW = win.offsetWidth;
+        pinchStartH = win.offsetHeight;
+      }
+    });
+    win.addEventListener(
+      "touchmove",
+      function (e) {
+        if (!pinchResizing || win.classList.contains("fullscreen")) return;
+        if (e.touches.length === 2) {
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const scale = dist / pinchStartDist;
+          let newW = clamp(
+            Math.round(pinchStartW * scale),
+            minWidth,
+            window.innerWidth - win.offsetLeft
+          );
+          let newH = clamp(
+            Math.round(pinchStartH * scale),
+            minHeight,
+            window.innerHeight - win.offsetTop
+          );
+          // Snap
+          if (Math.abs(win.offsetLeft + newW - window.innerWidth) < snapDist)
+            newW = window.innerWidth - win.offsetLeft;
+          if (Math.abs(win.offsetTop + newH - window.innerHeight) < snapDist)
+            newH = window.innerHeight - win.offsetTop;
+          win.style.width = newW + "px";
+          win.style.height = newH + "px";
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+    win.addEventListener("touchend", function (e) {
+      if (e.touches.length < 2) {
+        pinchResizing = false;
+        saveWindowState();
+      }
+    });
 
     const header = document.createElement("div");
     header.className = "app-window-header";
@@ -455,33 +704,79 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
     document.addEventListener("mousemove", function (e) {
       if (isDragging && !isMaximized) {
-        win.style.left = e.clientX - offsetX + "px";
-        win.style.top = e.clientY - offsetY + "px";
+        let newL = clamp(
+          e.clientX - offsetX,
+          0,
+          window.innerWidth - win.offsetWidth
+        );
+        let newT = clamp(
+          e.clientY - offsetY,
+          0,
+          window.innerHeight - win.offsetHeight
+        );
+        // Snap
+        newL = snap(newL, 0);
+        newT = snap(newT, 0);
+        newL =
+          snap(newL + win.offsetWidth, window.innerWidth) - win.offsetWidth;
+        newT =
+          snap(newT + win.offsetHeight, window.innerHeight) - win.offsetHeight;
+        win.style.left = newL + "px";
+        win.style.top = newT + "px";
       }
     });
     document.addEventListener("mouseup", function () {
+      if (isDragging) saveWindowState();
       isDragging = false;
       document.body.style.userSelect = "";
     });
 
-    closeBtn.addEventListener("click", () => {
-      win.remove();
-      if (webOSState.openAppWindows[appPath]) {
-        webOSState.openAppWindows[appPath] = webOSState.openAppWindows[
-          appPath
-        ].filter((w) => w !== win);
-        if (webOSState.openAppWindows[appPath].length === 0) {
-          delete webOSState.openAppWindows[appPath];
-          removeTaskbarIcon(appPath);
-        } else {
-          updateTaskbarBadge(appPath);
+    // --- Touch drag for app window header (mobile/tablet) ---
+    header.addEventListener("touchstart", function (e) {
+      if (e.target.closest(".app-window-controls")) return;
+      if (win.classList.contains("fullscreen")) return;
+      isDragging = true;
+      offsetX = e.touches[0].clientX - win.offsetLeft;
+      offsetY = e.touches[0].clientY - win.offsetTop;
+      zIndexCounter++;
+      win.style.zIndex = zIndexCounter;
+    });
+    document.addEventListener(
+      "touchmove",
+      function (e) {
+        if (isDragging && !isMaximized && e.touches && e.touches[0]) {
+          let newL = clamp(
+            e.touches[0].clientX - offsetX,
+            0,
+            window.innerWidth - win.offsetWidth
+          );
+          let newT = clamp(
+            e.touches[0].clientY - offsetY,
+            0,
+            window.innerHeight - win.offsetHeight
+          );
+          // Snap
+          newL = snap(newL, 0);
+          newT = snap(newT, 0);
+          newL =
+            snap(newL + win.offsetWidth, window.innerWidth) - win.offsetWidth;
+          newT =
+            snap(newT + win.offsetHeight, window.innerHeight) -
+            win.offsetHeight;
+          win.style.left = newL + "px";
+          win.style.top = newT + "px";
         }
-      }
+      },
+      { passive: false }
+    );
+    document.addEventListener("touchend", function () {
+      if (isDragging) saveWindowState();
+      isDragging = false;
     });
-    minBtn.addEventListener("click", () => {
-      win.style.display = "none";
-    });
-    maxBtn.addEventListener("click", () => {
+
+    // --- Double-click/double-tap to maximize/restore ---
+    let lastTap = 0;
+    function maximizeWindow() {
       if (!isMaximized) {
         prevSize = {
           left: win.style.left,
@@ -503,6 +798,38 @@ window.addEventListener("DOMContentLoaded", async () => {
         isMaximized = false;
         maxBtn.textContent = "□";
       }
+      saveWindowState();
+    }
+    header.addEventListener("dblclick", maximizeWindow);
+    header.addEventListener("touchend", function (e) {
+      const now = Date.now();
+      if (now - lastTap < 350) {
+        maximizeWindow();
+        lastTap = 0;
+      } else {
+        lastTap = now;
+      }
+    });
+    maxBtn.addEventListener("click", maximizeWindow);
+
+    closeBtn.addEventListener("click", () => {
+      win.remove();
+      if (webOSState.openAppWindows[appPath]) {
+        webOSState.openAppWindows[appPath] = webOSState.openAppWindows[
+          appPath
+        ].filter((w) => w !== win);
+        if (webOSState.openAppWindows[appPath].length === 0) {
+          delete webOSState.openAppWindows[appPath];
+          removeTaskbarIcon(appPath);
+        } else {
+          updateTaskbarBadge(appPath);
+        }
+      }
+      // Remove window state from storage
+      localStorage.removeItem("webos-window-" + appPath);
+    });
+    minBtn.addEventListener("click", () => {
+      win.style.display = "none";
     });
     win.addEventListener("dblclick", () => {
       win.style.display = "flex";
@@ -554,14 +881,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       <div class="context-menu-item" data-action="refresh">Refresh</div>
     `;
     document.body.appendChild(desktopContextMenu);
-    // Debug: log parent and position
-    console.log("Menu parent:", desktopContextMenu.parentElement);
     // Positioning
     desktopContextMenu.style.position = "fixed";
     desktopContextMenu.style.left = x + "px";
     desktopContextMenu.style.top = y + "px";
     desktopContextMenu.style.bottom = "";
-    console.log("Menu position:", x, y);
     // Prevent menu from closing on its own click
     desktopContextMenu.addEventListener("mousedown", (e) => {
       e.stopPropagation();
@@ -571,7 +895,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       const item = e.target.closest(".context-menu-item");
       if (!item) return;
       const action = item.getAttribute("data-action");
-      console.log("Context menu action:", action);
       if (action === "create-file") {
         const id = "file-" + Date.now() + Math.floor(Math.random() * 1000);
         let name = "New File";
@@ -633,7 +956,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     origRenderDesktopIcons = renderDesktopIcons;
     renderDesktopIcons = function (apps) {
       origRenderDesktopIcons(apps);
-      console.log("Patched renderDesktopIcons called", apps);
       document.querySelectorAll(".desktop-icon").forEach((icon) => {
         icon.addEventListener("click", function (e) {
           if (e.ctrlKey || e.metaKey) {
@@ -682,11 +1004,9 @@ window.addEventListener("DOMContentLoaded", async () => {
       });
     };
     renderDesktopIconsPatched = true;
-    console.log("Patched renderDesktopIcons");
   }
   patchRenderDesktopIcons();
   renderDesktopIcons(loadedApps);
-  console.log("Calling renderDesktopIcons after patch");
 
   // --- Touch drag for app windows on mobile/tablet ---
   document.body.addEventListener("touchstart", function (e) {
@@ -744,7 +1064,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     e.preventDefault();
-    console.log("Desktop context menu opened");
     showDesktopContextMenu(e.pageX, e.pageY, loadedApps);
   });
 
@@ -794,19 +1113,16 @@ window.addEventListener("DOMContentLoaded", async () => {
       '<div class="context-menu-item" data-action="duplicate">Duplicate</div>';
     iconContextMenu.innerHTML = menu;
     document.body.appendChild(iconContextMenu);
-    // Debug: log parent and position
-    console.log("Icon menu parent:", iconContextMenu.parentElement);
+    // Positioning
     iconContextMenu.style.position = "fixed";
     iconContextMenu.style.left = x + "px";
     iconContextMenu.style.top = y + "px";
     iconContextMenu.style.bottom = "";
-    console.log("Icon menu position:", x, y);
     iconContextMenu.addEventListener("mousedown", (e) => e.stopPropagation());
     iconContextMenu.addEventListener("click", function (e) {
       const item = e.target.closest(".context-menu-item");
       if (!item) return;
       const action = item.getAttribute("data-action");
-      console.log("Icon context menu action:", action);
       const selected = Array.from(
         document.querySelectorAll(".desktop-icon.selected")
       );
