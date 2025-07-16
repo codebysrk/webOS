@@ -146,10 +146,16 @@ window.onload = () => {
     // Create window elements
     const win = document.createElement("div");
     win.className = "app-window";
-    win.style.left = `${60 + Math.random() * 100}px`;
-    win.style.top = `${80 + Math.random() * 80}px`;
-    win.style.width = "500px";
-    win.style.height = "400px";
+    // Mobile full-screen logic
+    const isMobile = window.innerWidth <= 600;
+    if (isMobile) {
+      win.classList.add("fullscreen");
+    } else {
+      win.style.left = `${60 + Math.random() * 100}px`;
+      win.style.top = `${80 + Math.random() * 80}px`;
+      win.style.width = "500px";
+      win.style.height = "400px";
+    }
     win.style.zIndex = ++zIndexCounter;
     win.style.display = "flex";
     win.style.flexDirection = "column";
@@ -432,11 +438,36 @@ function setUserProfile({ name, avatar }) {
   // Optionally update UI
 }
 
-// On load, initialize settings
+// --- Persistent Wallpaper ---
+function setWallpaper(url) {
+  const desktop = document.querySelector(".desktop");
+  if (desktop) {
+    desktop.style.backgroundImage = url ? `url('${url}')` : "";
+    desktop.style.backgroundSize = "cover";
+    desktop.style.backgroundPosition = "center";
+    desktop.style.backgroundRepeat = "no-repeat";
+    webOSState.settings.wallpaper = url;
+    saveSettings();
+  }
+}
+
+// Listen for wallpaper change messages from apps
+window.addEventListener("message", (event) => {
+  const msg = event.data;
+  if (!msg || typeof msg !== "object" || !msg.type) return;
+  if (msg.type === "webos-set-wallpaper" && msg.url) {
+    setWallpaper(msg.url);
+  }
+});
+
+// On load, initialize settings and wallpaper
 window.addEventListener("DOMContentLoaded", () => {
   loadSettings();
   if (webOSState.settings.theme) {
     applyTheme(webOSState.settings.theme);
+  }
+  if (webOSState.settings.wallpaper) {
+    setWallpaper(webOSState.settings.wallpaper);
   }
   // Optionally, update user profile UI
 });
