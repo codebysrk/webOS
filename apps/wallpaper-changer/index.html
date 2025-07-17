@@ -52,11 +52,32 @@
           </div>
         </section>
 
+        <!-- Built-in Wallpapers Section -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-icon">🎨</div>
+            <h2 class="section-title">Built-in Wallpapers</h2>
+            <button
+              id="refreshWallpapersBtn"
+              class="refresh-btn"
+              title="Refresh wallpapers"
+            >
+              🔄
+            </button>
+          </div>
+
+          <div class="wallpaper-grid-container">
+            <div class="wallpaper-grid" id="wallpaperGrid">
+              <!-- Built-in wallpapers will be loaded here -->
+            </div>
+          </div>
+        </section>
+
         <!-- Upload Section -->
         <section class="section">
           <div class="section-header">
             <div class="section-icon">📤</div>
-            <h2 class="section-title">Upload</h2>
+            <h2 class="section-title">Upload Custom</h2>
           </div>
 
           <div class="upload-area" id="uploadArea">
@@ -70,6 +91,7 @@
               id="fileInput"
               class="file-input"
               accept="image/*"
+              aria-label="Select wallpaper image file"
             />
           </div>
 

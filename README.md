@@ -135,6 +135,45 @@ You can extend this protocol for more OS features (open/close window, settings, 
 - Test your app in both desktop and mobile views.
 - For new features or bugfixes, open a pull request with a clear description.
 
+## Desktop Management
+
+### App Visibility
+
+- System apps can be hidden from the desktop by right-clicking and selecting "Hide from Desktop"
+- Hidden apps can be restored by right-clicking on the desktop and selecting "Show Hidden Apps"
+- The Wallpaper Changer app is hidden by default on first load
+
+### Desktop Icons
+
+- Right-click on desktop icons to access context menu options
+- System apps: "Hide from Desktop", "Remove from Desktop"
+- User files/folders: "Rename", "Delete", "Duplicate"
+- Desktop icons can be dragged and repositioned
+- Icon positions are saved automatically
+
+## Wallpaper Management
+
+### Adding New Wallpapers
+- **Automatic Detection**: Simply copy wallpaper files to `assets/wallpapers/` folder and refresh the app
+- **Supported Formats**: JPG, PNG, GIF, WebP, BMP
+- **File Size Limit**: 10MB per wallpaper
+- **Smart Naming**: System automatically generates names from filenames
+- **Auto Icons**: Icons are automatically assigned based on filename keywords
+
+### Quick Steps:
+1. Copy wallpaper files to `assets/wallpapers/`
+2. Open Wallpaper Changer app
+3. Click the 🔄 refresh button
+4. New wallpapers will appear automatically
+
+### Smart Features:
+- **Keyword Detection**: `nature_forest.jpg` → 🌲 icon
+- **Name Generation**: `spider_man_4k.jpg` → "Spider Man"
+- **Auto Refresh**: Detects new files automatically
+- **Error Handling**: Shows loading states and error messages
+
+For detailed instructions, see `WALLPAPER_GUIDE.md`
+
 ## Simple Package Management (Install/Uninstall Apps)
 
 - To install a new app: Copy the app folder (with manifest, index.html/js/css, icon) into the `apps/` directory.
